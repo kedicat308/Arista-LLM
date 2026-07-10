@@ -28,6 +28,17 @@ subscriptions:
       - /system/memory/state/free
     stream-mode: sample
     sample-interval: 10s
+  # BGP neighbor session state (string FSM enum -> numeric 1..6), event-driven
+  bgp-state:
+    paths:
+      - /network-instances/network-instance/protocols/protocol/bgp/neighbors/neighbor/state/session-state
+    stream-mode: on-change
+  # BGP prefix counters (received / installed / sent), numeric
+  bgp-prefixes:
+    paths:
+      - /network-instances/network-instance/protocols/protocol/bgp/neighbors/neighbor/afi-safis/afi-safi/state/prefixes
+    stream-mode: sample
+    sample-interval: 15s
 
 processors:
   # convert oper/admin-status string enum (UP/DOWN) into numeric 1/0
@@ -44,13 +55,34 @@ processors:
         - ".*status.*"
       type: int
 
+  # map the 6 BGP FSM states to a numeric code (Established=6 is the only "good")
+  #   IDLE=1  CONNECT=2  ACTIVE=3  OPENSENT=4  OPENCONFIRM=5  ESTABLISHED=6
+  bgp-state-str2num:
+    event-strings:
+      value-names:
+        - "session-state"
+      transforms:
+        - replace: { apply-on: "value", old: "ESTABLISHED", new: "6" }
+        - replace: { apply-on: "value", old: "OPENCONFIRM", new: "5" }
+        - replace: { apply-on: "value", old: "OPENSENT",    new: "4" }
+        - replace: { apply-on: "value", old: "ACTIVE",      new: "3" }
+        - replace: { apply-on: "value", old: "CONNECT",     new: "2" }
+        - replace: { apply-on: "value", old: "IDLE",        new: "1" }
+  bgp-state-toint:
+    event-convert:
+      values:
+        - "session-state"
+      type: int
+
 outputs:
   prom:
     type: prometheus
     listen: ":9804"
     path: /metrics
-    expiration: 6h   # keep last on-change value (oper-status) from being evicted
+    expiration: 6h   # keep last on-change value (oper-status / bgp-state) from being evicted
     event-processors:
       - oper-status-str2num
       - oper-status-toint
+      - bgp-state-str2num
+      - bgp-state-toint
     # counters kept as-is; Prometheus rate() computes bps

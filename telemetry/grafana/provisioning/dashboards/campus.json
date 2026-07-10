@@ -1,11 +1,22 @@
 {
-  "annotations": { "list": [] },
+  "annotations": {
+    "list": []
+  },
   "editable": true,
   "refresh": "5s",
   "schemaVersion": 39,
-  "tags": ["campus", "telemetry", "gnmi"],
-  "templating": { "list": [] },
-  "time": { "from": "now-15m", "to": "now" },
+  "tags": [
+    "campus",
+    "telemetry",
+    "gnmi"
+  ],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-15m",
+    "to": "now"
+  },
   "timepicker": {},
   "title": "Campus gNMI Telemetry",
   "uid": "campus-telemetry",
@@ -13,18 +24,48 @@
   "panels": [
     {
       "type": "timeseries",
-      "title": "Inbound throughput (bps) — all router interfaces",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "title": "Inbound throughput (bps) \u2014 all router interfaces",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
-        "defaults": { "unit": "bps", "custom": { "drawStyle": "line", "fillOpacity": 10, "showPoints": "never" } },
+        "defaults": {
+          "unit": "bps",
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "showPoints": "never"
+          }
+        },
         "overrides": []
       },
-      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["last", "max"] }, "tooltip": { "mode": "multi" } },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "last",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
       "targets": [
         {
           "refId": "A",
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "expr": "label_replace(rate(interfaces_interface_state_counters_in_octets[1m])*8, \"dev\", \"$1\", \"source\", \"clab-campus-(.+):6030\")",
           "legendFormat": "{{dev}} {{interface_name}}"
         }
@@ -32,18 +73,48 @@
     },
     {
       "type": "timeseries",
-      "title": "Outbound throughput (bps) — all router interfaces",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "title": "Outbound throughput (bps) \u2014 all router interfaces",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
-        "defaults": { "unit": "bps", "custom": { "drawStyle": "line", "fillOpacity": 10, "showPoints": "never" } },
+        "defaults": {
+          "unit": "bps",
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "showPoints": "never"
+          }
+        },
         "overrides": []
       },
-      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["last", "max"] }, "tooltip": { "mode": "multi" } },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "last",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
       "targets": [
         {
           "refId": "A",
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "expr": "label_replace(rate(interfaces_interface_state_counters_out_octets[1m])*8, \"dev\", \"$1\", \"source\", \"clab-campus-(.+):6030\")",
           "legendFormat": "{{dev}} {{interface_name}}"
         }
@@ -51,24 +122,57 @@
     },
     {
       "type": "timeseries",
-      "title": "Core inter-link (Et2 core1↔core2) — the pc1/pc2→pc3 funnel",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "title": "Core inter-link (Et2 core1\u2194core2) \u2014 the pc1/pc2\u2192pc3 funnel",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
-        "defaults": { "unit": "bps", "custom": { "drawStyle": "line", "fillOpacity": 15, "showPoints": "never" } },
+        "defaults": {
+          "unit": "bps",
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 15,
+            "showPoints": "never"
+          }
+        },
         "overrides": []
       },
-      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["last", "max"] }, "tooltip": { "mode": "multi" } },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "last",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
       "targets": [
         {
           "refId": "A",
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "expr": "label_replace(rate(interfaces_interface_state_counters_in_octets{interface_name=\"Ethernet2\"}[1m])*8, \"dev\", \"$1\", \"source\", \"clab-campus-(.+):6030\")",
           "legendFormat": "{{dev}} Et2 in"
         },
         {
           "refId": "B",
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "expr": "label_replace(rate(interfaces_interface_state_counters_out_octets{interface_name=\"Ethernet2\"}[1m])*8, \"dev\", \"$1\", \"source\", \"clab-campus-(.+):6030\")",
           "legendFormat": "{{dev}} Et2 out"
         }
@@ -77,23 +181,56 @@
     {
       "type": "timeseries",
       "title": "Interface discards rate (pps)",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
-        "defaults": { "unit": "pps", "custom": { "drawStyle": "line", "fillOpacity": 10, "showPoints": "never" } },
+        "defaults": {
+          "unit": "pps",
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "showPoints": "never"
+          }
+        },
         "overrides": []
       },
-      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["last", "max"] }, "tooltip": { "mode": "multi" } },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "last",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
       "targets": [
         {
           "refId": "A",
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "expr": "label_replace(rate(interfaces_interface_state_counters_in_discards[1m]), \"dev\", \"$1\", \"source\", \"clab-campus-(.+):6030\")",
           "legendFormat": "{{dev}} {{interface_name}} in-disc"
         },
         {
           "refId": "B",
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "expr": "label_replace(rate(interfaces_interface_state_counters_out_discards[1m]), \"dev\", \"$1\", \"source\", \"clab-campus-(.+):6030\")",
           "legendFormat": "{{dev}} {{interface_name}} out-disc"
         }
@@ -102,17 +239,49 @@
     {
       "type": "timeseries",
       "title": "CPU utilization (%)",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 16
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
-        "defaults": { "unit": "percent", "min": 0, "max": 100, "custom": { "drawStyle": "line", "fillOpacity": 10, "showPoints": "never" } },
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "showPoints": "never"
+          }
+        },
         "overrides": []
       },
-      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["last", "max"] }, "tooltip": { "mode": "multi" } },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "last",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
       "targets": [
         {
           "refId": "A",
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "expr": "label_replace(components_component_cpu_utilization_state_instant, \"dev\", \"$1\", \"source\", \"clab-campus-(.+):6030\")",
           "legendFormat": "{{dev}}"
         }
@@ -121,17 +290,46 @@
     {
       "type": "timeseries",
       "title": "Memory used (bytes)",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 16
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
-        "defaults": { "unit": "bytes", "custom": { "drawStyle": "line", "fillOpacity": 10, "showPoints": "never" } },
+        "defaults": {
+          "unit": "bytes",
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "showPoints": "never"
+          }
+        },
         "overrides": []
       },
-      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["last"] }, "tooltip": { "mode": "multi" } },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "last"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
       "targets": [
         {
           "refId": "A",
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "expr": "label_replace(system_memory_state_used, \"dev\", \"$1\", \"source\", \"clab-campus-(.+):6030\")",
           "legendFormat": "{{dev}}"
         }
@@ -139,24 +337,69 @@
     },
     {
       "type": "state-timeline",
-      "title": "Router link status (gNMI oper-status, on-change) — 1=up 0=down",
-      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 24 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "title": "Router link status (gNMI oper-status, on-change) \u2014 1=up 0=down",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 24
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
-          "custom": { "fillOpacity": 80, "lineWidth": 0 },
+          "custom": {
+            "fillOpacity": 80,
+            "lineWidth": 0
+          },
           "mappings": [
-            { "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } }
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "DOWN",
+                  "color": "red"
+                },
+                "1": {
+                  "text": "UP",
+                  "color": "green"
+                }
+              }
+            }
           ],
-          "thresholds": { "mode": "absolute", "steps": [ { "color": "red", "value": null }, { "color": "green", "value": 1 } ] }
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          }
         },
         "overrides": []
       },
-      "options": { "showValue": "never", "mergeValues": true, "legend": { "displayMode": "list", "placement": "bottom" } },
+      "options": {
+        "showValue": "never",
+        "mergeValues": true,
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
       "targets": [
         {
           "refId": "A",
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "expr": "label_replace(interfaces_interface_state_oper_status, \"dev\", \"$1\", \"source\", \"clab-campus-(.+):6030\")",
           "legendFormat": "{{dev}} {{interface_name}}"
         }
@@ -164,18 +407,48 @@
     },
     {
       "type": "timeseries",
-      "title": "Switch interface throughput (bps) — SNMP ifHCInOctets, eth1/eth2/eth3 only",
-      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 32 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "title": "Switch interface throughput (bps) \u2014 SNMP ifHCInOctets, eth1/eth2/eth3 only",
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 32
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
-        "defaults": { "unit": "bps", "custom": { "drawStyle": "line", "fillOpacity": 10, "showPoints": "never" } },
+        "defaults": {
+          "unit": "bps",
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "showPoints": "never"
+          }
+        },
         "overrides": []
       },
-      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["last", "max"] }, "tooltip": { "mode": "multi" } },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "last",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
       "targets": [
         {
           "refId": "A",
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "expr": "rate(ifHCInOctets{job=\"snmp-switches\", ifDescr=~\"eth[123]\"}[1m])*8",
           "legendFormat": "{{instance}} {{ifDescr}} in"
         }
@@ -183,20 +456,202 @@
     },
     {
       "type": "timeseries",
-      "title": "Per-process memory (top 15 by RSS, all routers) — gNMI EOS-native /Kernel/proc",
-      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 41 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "title": "Per-process memory (top 15 by RSS, all routers) \u2014 gNMI EOS-native /Kernel/proc",
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 41
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
-        "defaults": { "unit": "bytes", "custom": { "drawStyle": "line", "fillOpacity": 10, "showPoints": "never" } },
+        "defaults": {
+          "unit": "bytes",
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "showPoints": "never"
+          }
+        },
         "overrides": []
       },
-      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["last", "max"] }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "last",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
       "targets": [
         {
           "refId": "A",
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "expr": "topk(15, label_replace(eos_native_Kernel_proc_stat_rss * on(pid,source) group_left(proc) proc_info, \"dev\", \"$1\", \"source\", \"clab-campus-(.+):6030\") * 4096)",
           "legendFormat": "{{dev}} {{proc}}"
+        }
+      ]
+    },
+    {
+      "type": "state-timeline",
+      "title": "BGP session state (gNMI on-change) \u2014 6=Established is the only healthy state",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 51
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "fillOpacity": 80,
+            "lineWidth": 0
+          },
+          "min": 1,
+          "max": 6,
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "1": {
+                  "text": "Idle",
+                  "color": "red"
+                },
+                "2": {
+                  "text": "Connect",
+                  "color": "orange"
+                },
+                "3": {
+                  "text": "Active",
+                  "color": "red"
+                },
+                "4": {
+                  "text": "OpenSent",
+                  "color": "yellow"
+                },
+                "5": {
+                  "text": "OpenConfirm",
+                  "color": "yellow"
+                },
+                "6": {
+                  "text": "Established",
+                  "color": "green"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 4
+              },
+              {
+                "color": "green",
+                "value": 6
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "showValue": "always",
+        "mergeValues": true,
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "label_replace(network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_state_session_state, \"dev\", \"$1\", \"source\", \"clab-campus-(.+):6030\")",
+          "legendFormat": "{{dev}} \u2192 {{neighbor_neighbor_address}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "BGP prefixes (IPv4 unicast) \u2014 received / sent per neighbor",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 59
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "stepAfter",
+            "fillOpacity": 5,
+            "showPoints": "always",
+            "pointSize": 6
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "last"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "label_replace(network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_afi_safis_afi_safi_state_prefixes_received{afi_safi_afi_safi_name=\"IPV4_UNICAST\"}, \"dev\", \"$1\", \"source\", \"clab-campus-(.+):6030\")",
+          "legendFormat": "{{dev}} \u2192 {{neighbor_neighbor_address}} recv"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "label_replace(network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_afi_safis_afi_safi_state_prefixes_sent{afi_safi_afi_safi_name=\"IPV4_UNICAST\"}, \"dev\", \"$1\", \"source\", \"clab-campus-(.+):6030\")",
+          "legendFormat": "{{dev}} \u2192 {{neighbor_neighbor_address}} sent"
         }
       ]
     }
