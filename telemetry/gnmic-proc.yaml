@@ -24,7 +24,7 @@ processors:
       value-names:
         - "^eos_native:/Kernel/proc/stat/(?P<pid>\\d+)/"
   # 2. turn each `comm` (process name) event into a proc_info{pid,proc}=1 series;
-  #    all other events pass through unchanged (self-contained per event)
+  #    all other events pass through unchanged (self-contained per event, reliable)
   proc-comm-to-info:
     event-jq:
       expression: >
@@ -55,7 +55,10 @@ outputs:
     type: prometheus
     listen: ":9805"
     path: /metrics
-    expiration: 6h
+    # was 6h — short expiration bounds cardinality to currently-alive procs,
+    # so churned pids (systemctl/sleep from the rsyslog crash-loop) drop in ~60s
+    # instead of lingering 6h. Real (long-lived) agents stay refreshed.
+    expiration: 60s
     event-processors:
       - proc-extract-pid
       - proc-comm-to-info

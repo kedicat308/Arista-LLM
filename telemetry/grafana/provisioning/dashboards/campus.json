@@ -499,7 +499,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "topk(15, label_replace(eos_native_Kernel_proc_stat_rss * on(pid,source) group_left(proc) proc_info, \"dev\", \"$1\", \"source\", \"clab-campus-(.+):6030\") * 4096)",
+          "expr": "topk(15, label_replace(eos_native_Kernel_proc_stat_rss * on(pid,source) group_left(proc) proc_info{proc=~\"[A-Z].*\"}, \"dev\", \"$1\", \"source\", \"clab-campus-(.+):6030\") * 4096)",
           "legendFormat": "{{dev}} {{proc}}"
         }
       ]
