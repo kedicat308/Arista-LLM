@@ -1,0 +1,57 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: zbx-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: zabbix
+      POSTGRES_PASSWORD: zabbix
+      POSTGRES_DB: zabbix
+    volumes:
+      - zbx-db-data:/var/lib/postgresql/data
+    networks:
+      - zbx-internal
+
+  zabbix-server:
+    image: zabbix/zabbix-server-pgsql:alpine-7.0-latest
+    container_name: zbx-server
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      DB_SERVER_HOST: db
+      POSTGRES_USER: zabbix
+      POSTGRES_PASSWORD: zabbix
+      POSTGRES_DB: zabbix
+    networks:
+      zbx-internal:
+      campus-mgmt:
+        ipv4_address: 172.30.30.50
+
+  zabbix-web:
+    image: zabbix/zabbix-web-nginx-pgsql:alpine-7.0-latest
+    container_name: zbx-web
+    restart: unless-stopped
+    depends_on:
+      - zabbix-server
+      - db
+    environment:
+      DB_SERVER_HOST: db
+      POSTGRES_USER: zabbix
+      POSTGRES_PASSWORD: zabbix
+      POSTGRES_DB: zabbix
+      ZBX_SERVER_HOST: zabbix-server
+      PHP_TZ: Asia/Shanghai
+    ports:
+      - "127.0.0.1:8081:8080"
+    networks:
+      - zbx-internal
+
+volumes:
+  zbx-db-data:
+
+networks:
+  zbx-internal:
+    driver: bridge
+  campus-mgmt:
+    external: true

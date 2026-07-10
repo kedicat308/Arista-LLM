@@ -1,0 +1,161 @@
+name: campus
+
+mgmt:
+  network: campus-mgmt
+  ipv4-subnet: 172.30.30.0/24
+  external-access: false
+
+topology:
+  kinds:
+    ceos:
+      image: arista/ceos:4.35.2F
+    linux:
+      image: clab-alpine:latest
+
+  nodes:
+    # ---------- edge routers (Arista cEOS) ----------
+    edge1:
+      kind: ceos
+      startup-config: configs/edge1.cfg
+    edge2:
+      kind: ceos
+      startup-config: configs/edge2.cfg
+
+    # ---------- core routers (Arista cEOS) ----------
+    core1:
+      kind: ceos
+      startup-config: configs/core1.cfg
+    core2:
+      kind: ceos
+      startup-config: configs/core2.cfg
+
+    # ---------- core switches (Alpine L2 bridge) ----------
+    csw1:
+      kind: linux
+      exec:
+        - ip link add name br0 type bridge
+        - ip link set dev br0 up
+        - ip link set dev eth1 master br0
+        - ip link set dev eth2 master br0
+        - ip link set dev eth3 master br0
+        - ip link set dev eth1 up
+        - ip link set dev eth2 up
+        - ip link set dev eth3 up
+    csw2:
+      kind: linux
+      exec:
+        - ip link add name br0 type bridge
+        - ip link set dev br0 up
+        - ip link set dev eth1 master br0
+        - ip link set dev eth2 master br0
+        - ip link set dev eth3 master br0
+        - ip link set dev eth1 up
+        - ip link set dev eth2 up
+        - ip link set dev eth3 up
+
+    # ---------- access switches (Alpine L2 bridge) ----------
+    asw1:
+      kind: linux
+      exec:
+        - ip link add name br0 type bridge
+        - ip link set dev br0 up
+        - ip link set dev eth1 master br0
+        - ip link set dev eth2 master br0
+        - ip link set dev eth1 up
+        - ip link set dev eth2 up
+    asw2:
+      kind: linux
+      exec:
+        - ip link add name br0 type bridge
+        - ip link set dev br0 up
+        - ip link set dev eth1 master br0
+        - ip link set dev eth2 master br0
+        - ip link set dev eth1 up
+        - ip link set dev eth2 up
+    asw3:
+      kind: linux
+      exec:
+        - ip link add name br0 type bridge
+        - ip link set dev br0 up
+        - ip link set dev eth1 master br0
+        - ip link set dev eth2 master br0
+        - ip link set dev eth1 up
+        - ip link set dev eth2 up
+    asw4:
+      kind: linux
+      exec:
+        - ip link add name br0 type bridge
+        - ip link set dev br0 up
+        - ip link set dev eth1 master br0
+        - ip link set dev eth2 master br0
+        - ip link set dev eth1 up
+        - ip link set dev eth2 up
+
+    # ---------- PCs (Alpine, no mgmt interface) ----------
+    pc1:
+      kind: linux
+      network-mode: none
+      exec:
+        - ip link set dev eth1 up
+        - ip addr add 10.1.0.11/24 dev eth1
+        - ip route add default via 10.1.0.1
+    pc2:
+      kind: linux
+      network-mode: none
+      exec:
+        - ip link set dev eth1 up
+        - ip addr add 10.1.0.12/24 dev eth1
+        - ip route add default via 10.1.0.1
+    pc3:
+      kind: linux
+      network-mode: none
+      exec:
+        - ip link set dev eth1 up
+        - ip addr add 10.2.0.11/24 dev eth1
+        - ip route add default via 10.2.0.1
+    pc4:
+      kind: linux
+      network-mode: none
+      exec:
+        - ip link set dev eth1 up
+        - ip addr add 10.2.0.12/24 dev eth1
+        - ip route add default via 10.2.0.1
+
+    # ---------- Internet NAT gateway ----------
+    # Uses docker's default bridge (has internet via host) for eth0;
+    # eth1/eth2 are point-to-point links to edge1/edge2.
+    inet:
+      kind: linux
+      network-mode: bridge
+      exec:
+        - sysctl -w net.ipv4.ip_forward=1
+        - ip link set dev eth1 up
+        - ip addr add 192.168.100.1/30 dev eth1
+        - ip link set dev eth2 up
+        - ip addr add 192.168.100.5/30 dev eth2
+        - ip route add 10.1.0.0/24 via 192.168.100.2
+        - ip route add 10.2.0.0/24 via 192.168.100.6
+        - iptables -t nat -A POSTROUTING -s 10.0.0.0/8 -o eth0 -j MASQUERADE
+
+  links:
+    # edges <-> internet
+    - endpoints: ["edge1:eth1", "inet:eth1"]
+    - endpoints: ["edge2:eth1", "inet:eth2"]
+    # edges <-> cores
+    - endpoints: ["edge1:eth2", "core1:eth1"]
+    - endpoints: ["edge2:eth2", "core2:eth1"]
+    # core <-> core
+    - endpoints: ["core1:eth2", "core2:eth2"]
+    # cores <-> core switches
+    - endpoints: ["core1:eth3", "csw1:eth1"]
+    - endpoints: ["core2:eth3", "csw2:eth1"]
+    # core switches <-> access switches
+    - endpoints: ["csw1:eth2", "asw1:eth1"]
+    - endpoints: ["csw1:eth3", "asw2:eth1"]
+    - endpoints: ["csw2:eth2", "asw3:eth1"]
+    - endpoints: ["csw2:eth3", "asw4:eth1"]
+    # access switches <-> PCs
+    - endpoints: ["asw1:eth2", "pc1:eth1"]
+    - endpoints: ["asw2:eth2", "pc2:eth1"]
+    - endpoints: ["asw3:eth2", "pc3:eth1"]
+    - endpoints: ["asw4:eth2", "pc4:eth1"]

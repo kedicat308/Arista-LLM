@@ -1,0 +1,63 @@
+username: admin
+password: admin
+insecure: true
+encoding: json_ietf
+log: true
+
+targets:
+  clab-campus-core1:6030:
+  clab-campus-core2:6030:
+  clab-campus-edge1:6030:
+  clab-campus-edge2:6030:
+
+subscriptions:
+  proc-mem:
+    paths:
+      - eos_native:/Kernel/proc/stat
+    stream-mode: sample
+    sample-interval: 15s
+
+processors:
+  # 1. lift pid out of the value name into a `pid` tag
+  proc-extract-pid:
+    event-extract-tags:
+      value-names:
+        - "^eos_native:/Kernel/proc/stat/(?P<pid>\\d+)/"
+  # 2. turn each `comm` (process name) event into a proc_info{pid,proc}=1 series;
+  #    all other events pass through unchanged (self-contained per event)
+  proc-comm-to-info:
+    event-jq:
+      expression: >
+        map(
+          if any(.values | keys[]; endswith("/comm")) then
+            {name: .name, timestamp: .timestamp,
+             tags: (.tags + {proc: ([.values | to_entries[] | select(.key|endswith("/comm")) | .value][0])}),
+             values: {"proc_info": 1}}
+          else . end
+        )
+  # 3. strip the /<pid>/ path segment so metric names are pid-free
+  proc-rename:
+    event-strings:
+      value-names: [".*"]
+      transforms:
+        - replace: { apply-on: "name", old: "/stat/[0-9]+/", new: "/stat/" }
+  # 4. keep only rss / vsize / cpu + the proc_info mapping series
+  proc-allow:
+    event-allow:
+      value-names:
+        - "rss$"
+        - "vsize$"
+        - "cpuUtilization$"
+        - "proc_info$"
+
+outputs:
+  prom:
+    type: prometheus
+    listen: ":9805"
+    path: /metrics
+    expiration: 6h
+    event-processors:
+      - proc-extract-pid
+      - proc-comm-to-info
+      - proc-rename
+      - proc-allow

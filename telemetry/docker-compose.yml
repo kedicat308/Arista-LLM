@@ -1,0 +1,62 @@
+name: campus-telemetry
+
+services:
+  gnmic:
+    image: ghcr.io/openconfig/gnmic:latest
+    container_name: gnmic
+    command: --config /app/gnmic.yaml subscribe
+    volumes:
+      - ./gnmic.yaml:/app/gnmic.yaml:ro
+    networks:
+      - campus-mgmt
+    restart: unless-stopped
+
+  gnmic-proc:
+    image: ghcr.io/openconfig/gnmic:latest
+    container_name: gnmic-proc
+    command: --config /app/gnmic-proc.yaml subscribe
+    volumes:
+      - ./gnmic-proc.yaml:/app/gnmic-proc.yaml:ro
+    networks:
+      - campus-mgmt
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    networks:
+      - campus-mgmt
+    ports:
+      - "127.0.0.1:9090:9090"
+    restart: unless-stopped
+
+  snmp-exporter:
+    image: prom/snmp-exporter:latest
+    container_name: snmp-exporter
+    networks:
+      - campus-mgmt
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana-oss:11.3.1
+    container_name: grafana
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+      GF_ANALYTICS_CHECK_FOR_PLUGIN_UPDATES: "false"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    networks:
+      - campus-mgmt
+    ports:
+      - "127.0.0.1:3000:3000"
+    restart: unless-stopped
+
+networks:
+  campus-mgmt:
+    external: true

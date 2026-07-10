@@ -1,0 +1,43 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+
+scrape_configs:
+  # Arista routers via gNMI (gnmic prometheus output)
+  - job_name: gnmic
+    static_configs:
+      - targets: ['gnmic:9804']
+
+  # Per-process memory/cpu via gNMI EOS-native (separate gnmic instance)
+  - job_name: gnmic-proc
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['gnmic-proc:9805']
+
+  # Alpine L2 switches via SNMP (snmp_exporter, if_mib module)
+  - job_name: snmp-switches
+    scrape_interval: 10s
+    metrics_path: /snmp
+    params:
+      module: [if_mib]
+      auth: [public_v2]
+    static_configs:
+      - targets: ['172.30.30.4']
+        labels: { role: core-switch, alias: csw1 }
+      - targets: ['172.30.30.9']
+        labels: { role: core-switch, alias: csw2 }
+      - targets: ['172.30.30.3']
+        labels: { role: access-switch, alias: asw1 }
+      - targets: ['172.30.30.11']
+        labels: { role: access-switch, alias: asw2 }
+      - targets: ['172.30.30.2']
+        labels: { role: access-switch, alias: asw3 }
+      - targets: ['172.30.30.10']
+        labels: { role: access-switch, alias: asw4 }
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [alias]
+        target_label: instance
+      - target_label: __address__
+        replacement: snmp-exporter:9116

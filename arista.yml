@@ -1,0 +1,46 @@
+name: arista-single
+prefix: ""
+topology:
+  nodes:
+    R1:
+      kind: arista_ceos
+      image: arista/ceos:4.35.2F  # 确保这个名字和你 docker images 看到的一致
+      exec:
+        - cli -c "conf t; vrf instance mgmt; interface Management0; vrf forwarding mgmt; ip address dhcp; end"
+
+    R2:
+      kind: arista_ceos
+      image: arista/ceos:4.35.2F  # 确保这个名字和你 docker images 看到的一致
+      exec:
+        - cli -c "conf t; vrf instance mgmt; interface Management0; vrf forwarding mgmt; ip address dhcp; end"
+
+    R3:
+      kind: arista_ceos
+      image: arista/ceos:4.35.2F  # 确保这个名字和你 docker images 看到的一致
+      exec:
+        - cli -c "conf t; vrf instance mgmt; interface Management0; vrf forwarding mgmt; ip address dhcp; end"
+
+    R4:
+      kind: arista_ceos
+      image: arista/ceos:4.35.2F  # 确保这个名字和你 docker images 看到的一致
+      exec:
+        - cli -c "conf t; vrf instance mgmt; interface Management0; vrf forwarding mgmt; ip address dhcp; end"
+
+    R5:
+      kind: arista_ceos
+      image: arista/ceos:4.35.2F  # 确保这个名字和你 docker images 看到的一致
+      exec:
+        - cli -c "conf t; vrf instance mgmt; interface Management0; vrf forwarding mgmt; ip address dhcp; end"
+
+    R6:
+      kind: arista_ceos
+      image: arista/ceos:4.35.2F  # 确保这个名字和你 docker images 看到的一致
+      exec:
+        - cli -c "conf t; vrf instance mgmt; interface Management0; vrf forwarding mgmt; ip address dhcp; end"
+
+  links:
+    - endpoints: ["R1:eth1", "R2:eth1"]
+    - endpoints: ["R2:eth2", "R3:eth1"]
+    - endpoints: ["R3:eth2", "R4:eth1"]
+    - endpoints: ["R4:eth2", "R5:eth1"]
+    - endpoints: ["R5:eth2", "R6:eth1"]

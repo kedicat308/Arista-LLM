@@ -1,0 +1,3 @@
+FROM alpine:latest
+RUN apk add --no-cache iproute2 iptables iputils tcpdump bind-tools curl
+CMD ["sleep", "infinity"]

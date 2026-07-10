@@ -1,0 +1,56 @@
+username: admin
+password: admin
+insecure: true
+encoding: json_ietf
+log: true
+
+targets:
+  clab-campus-core1:6030:
+  clab-campus-core2:6030:
+  clab-campus-edge1:6030:
+  clab-campus-edge2:6030:
+
+subscriptions:
+  if-counters:
+    paths:
+      - /interfaces/interface/state/counters
+    stream-mode: sample
+    sample-interval: 5s
+  if-status:
+    paths:
+      - /interfaces/interface/state/oper-status
+      - /interfaces/interface/state/admin-status
+    stream-mode: on-change
+  sys-health:
+    paths:
+      - /components/component[name=CPU0]/cpu/utilization/state/instant
+      - /system/memory/state/used
+      - /system/memory/state/free
+    stream-mode: sample
+    sample-interval: 10s
+
+processors:
+  # convert oper/admin-status string enum (UP/DOWN) into numeric 1/0
+  oper-status-str2num:
+    event-strings:
+      value-names:
+        - ".*status.*"
+      transforms:
+        - replace: { apply-on: "value", old: "UP", new: "1" }
+        - replace: { apply-on: "value", old: "DOWN", new: "0" }
+  oper-status-toint:
+    event-convert:
+      values:
+        - ".*status.*"
+      type: int
+
+outputs:
+  prom:
+    type: prometheus
+    listen: ":9804"
+    path: /metrics
+    expiration: 6h   # keep last on-change value (oper-status) from being evicted
+    event-processors:
+      - oper-status-str2num
+      - oper-status-toint
+    # counters kept as-is; Prometheus rate() computes bps

@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>Campus Topology — containerlab</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --panel: #1e293b;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --edge: #64748b;
+    --link: #38bdf8;
+
+    --ceos: #a78bfa;
+    --ceos-dk: #6d28d9;
+    --sw: #34d399;
+    --sw-dk: #047857;
+    --pc: #fbbf24;
+    --pc-dk: #b45309;
+    --nat: #f472b6;
+    --nat-dk: #a21caf;
+    --inet: #7dd3fc;
+    --inet-dk: #0369a1;
+  }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text);
+               font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }
+  header {
+    padding: 18px 24px; border-bottom: 1px solid #334155;
+    display: flex; justify-content: space-between; align-items: baseline;
+  }
+  header h1 { margin: 0; font-size: 20px; font-weight: 600; }
+  header .sub { color: var(--muted); font-size: 13px; }
+  main { display: grid; grid-template-columns: 1fr 320px; gap: 16px; padding: 16px 24px; }
+  .canvas-wrap { background: var(--panel); border-radius: 12px; overflow: hidden; }
+  svg { width: 100%; height: auto; display: block; }
+
+  /* devices */
+  .dev rect { stroke-width: 1.5; }
+  .dev text.name { font-size: 14px; font-weight: 600; fill: #0f172a; text-anchor: middle; }
+  .dev text.role { font-size: 10px; fill: #1e293b; text-anchor: middle; opacity: .7; }
+  .dev text.ip { font-size: 10px; fill: var(--text); text-anchor: middle;
+                  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; }
+
+  .dev.ceos rect { fill: var(--ceos); stroke: var(--ceos-dk); }
+  .dev.sw   rect { fill: var(--sw);   stroke: var(--sw-dk); }
+  .dev.pc   rect { fill: var(--pc);   stroke: var(--pc-dk); }
+  .dev.nat  rect { fill: var(--nat);  stroke: var(--nat-dk); }
+  .dev.inet rect { fill: var(--inet); stroke: var(--inet-dk); }
+
+  /* links */
+  .link { stroke: var(--edge); stroke-width: 2; fill: none; }
+  .link.trunk { stroke: var(--link); stroke-width: 2.5; }
+  .link.wan { stroke: #22d3ee; stroke-width: 2.5; stroke-dasharray: 4 3; }
+  .link-label {
+    font-size: 10px; fill: var(--muted);
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  }
+
+  /* subnet zones */
+  .zone { fill: #38bdf8; opacity: .06; stroke: #38bdf8; stroke-dasharray: 5 4; stroke-opacity: .4; }
+  .zone-a { fill: #a78bfa; }
+  .zone-b { fill: #f472b6; }
+  .zone-label {
+    font-size: 11px; font-weight: 500;
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  }
+
+  aside { display: flex; flex-direction: column; gap: 12px; }
+  .card { background: var(--panel); border-radius: 12px; padding: 14px 16px; }
+  .card h2 { margin: 0 0 10px 0; font-size: 14px; font-weight: 600;
+              text-transform: uppercase; letter-spacing: .5px; color: var(--muted); }
+  .card table { width: 100%; border-collapse: collapse; font-size: 12px;
+                 font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; }
+  .card td { padding: 3px 0; border-bottom: 1px dashed #334155; }
+  .card td:last-child { text-align: right; color: var(--muted); }
+  .legend { display: flex; flex-wrap: wrap; gap: 10px; font-size: 12px; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; border: 1px solid rgba(0,0,0,.2); }
+  .note { color: var(--muted); font-size: 12px; line-height: 1.5; }
+  .note code { background: #0f172a; padding: 1px 5px; border-radius: 3px; }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Campus Topology</h1>
+    <div class="sub">containerlab · campus.yml · 15 containers</div>
+  </div>
+  <div class="sub">路由器: Arista cEOS 4.35.2F &nbsp;|&nbsp; 交换机/PC: clab-alpine</div>
+</header>
+<main>
+  <div class="canvas-wrap">
+    <svg viewBox="0 0 1200 820" xmlns="http://www.w3.org/2000/svg">
+
+      <!-- ============ subnet zones ============ -->
+      <!-- csw1 broadcast domain 10.1.0.0/24 -->
+      <rect class="zone zone-a" x="60"  y="440" width="480" height="360" rx="14"/>
+      <text class="zone-label" x="80"  y="462" fill="#c4b5fd">10.1.0.0/24 (csw1 broadcast)</text>
+      <!-- csw2 broadcast domain 10.2.0.0/24 -->
+      <rect class="zone zone-b" x="660" y="440" width="480" height="360" rx="14"/>
+      <text class="zone-label" x="680" y="462" fill="#f9a8d4">10.2.0.0/24 (csw2 broadcast)</text>
+
+      <!-- ============ links (drawn first, under nodes) ============ -->
+      <!-- INTERNET -> inet -->
+      <path class="link wan" d="M 600,80 L 600,140"/>
+      <text class="link-label" x="608" y="115">Internet (via host)</text>
+
+      <!-- inet -> edge1 / edge2 -->
+      <path class="link wan" d="M 570,170 L 380,240"/>
+      <path class="link wan" d="M 630,170 L 820,240"/>
+      <text class="link-label" x="410" y="200">192.168.100.0/30</text>
+      <text class="link-label" x="700" y="200">192.168.100.4/30</text>
+
+      <!-- edge1 -> core1 -->
+      <path class="link trunk" d="M 360,275 L 360,345"/>
+      <text class="link-label" x="240" y="315">10.0.13.0/30</text>
+      <!-- edge2 -> core2 -->
+      <path class="link trunk" d="M 840,275 L 840,345"/>
+      <text class="link-label" x="850" y="315">10.0.24.0/30</text>
+
+      <!-- core1 <-> core2 backbone -->
+      <path class="link trunk" d="M 400,375 L 800,375"/>
+      <text class="link-label" x="560" y="368">10.0.12.0/30 (core backbone)</text>
+
+      <!-- core1 -> csw1 -->
+      <path class="link" d="M 360,405 L 360,485"/>
+      <text class="link-label" x="240" y="445" fill="#c4b5fd">10.1.0.1/24 (gw)</text>
+      <!-- core2 -> csw2 -->
+      <path class="link" d="M 840,405 L 840,485"/>
+      <text class="link-label" x="850" y="445" fill="#f9a8d4">10.2.0.1/24 (gw)</text>
+
+      <!-- csw1 -> asw1 / asw2 -->
+      <path class="link" d="M 340,515 L 190,605"/>
+      <path class="link" d="M 380,515 L 430,605"/>
+      <!-- csw2 -> asw3 / asw4 -->
+      <path class="link" d="M 820,515 L 770,605"/>
+      <path class="link" d="M 860,515 L 1010,605"/>
+
+      <!-- asw* -> pc* -->
+      <path class="link" d="M 190,635 L 190,715"/>
+      <path class="link" d="M 430,635 L 430,715"/>
+      <path class="link" d="M 770,635 L 770,715"/>
+      <path class="link" d="M 1010,635 L 1010,715"/>
+
+      <!-- ============ nodes ============ -->
+      <!-- INTERNET cloud -->
+      <g class="dev inet" transform="translate(540,40)">
+        <ellipse cx="60" cy="20" rx="80" ry="24" fill="#7dd3fc" stroke="#0369a1" stroke-width="1.5"/>
+        <text class="name" x="60" y="24">INTERNET</text>
+      </g>
+
+      <!-- inet NAT -->
+      <g class="dev nat" transform="translate(540,140)">
+        <rect x="0" y="0" width="120" height="34" rx="8"/>
+        <text class="name" x="60" y="16">inet</text>
+        <text class="role" x="60" y="28">Alpine + NAT</text>
+      </g>
+
+      <!-- edge1 -->
+      <g class="dev ceos" transform="translate(300,240)">
+        <rect x="0" y="0" width="120" height="40" rx="8"/>
+        <text class="name" x="60" y="17">edge1</text>
+        <text class="role" x="60" y="30">cEOS · 出口路由</text>
+      </g>
+      <text class="ip" x="360" y="295">.2/30 &nbsp; .2/30</text>
+
+      <!-- edge2 -->
+      <g class="dev ceos" transform="translate(780,240)">
+        <rect x="0" y="0" width="120" height="40" rx="8"/>
+        <text class="name" x="60" y="17">edge2</text>
+        <text class="role" x="60" y="30">cEOS · 出口路由</text>
+      </g>
+      <text class="ip" x="840" y="295">.6/30 &nbsp; .2/30</text>
+
+      <!-- core1 -->
+      <g class="dev ceos" transform="translate(300,360)">
+        <rect x="0" y="0" width="120" height="40" rx="8"/>
+        <text class="name" x="60" y="17">core1</text>
+        <text class="role" x="60" y="30">cEOS · 核心路由</text>
+      </g>
+      <!-- core2 -->
+      <g class="dev ceos" transform="translate(780,360)">
+        <rect x="0" y="0" width="120" height="40" rx="8"/>
+        <text class="name" x="60" y="17">core2</text>
+        <text class="role" x="60" y="30">cEOS · 核心路由</text>
+      </g>
+
+      <!-- csw1 -->
+      <g class="dev sw" transform="translate(300,485)">
+        <rect x="0" y="0" width="120" height="34" rx="8"/>
+        <text class="name" x="60" y="16">csw1</text>
+        <text class="role" x="60" y="28">L2 bridge · 核心交换</text>
+      </g>
+      <!-- csw2 -->
+      <g class="dev sw" transform="translate(780,485)">
+        <rect x="0" y="0" width="120" height="34" rx="8"/>
+        <text class="name" x="60" y="16">csw2</text>
+        <text class="role" x="60" y="28">L2 bridge · 核心交换</text>
+      </g>
+
+      <!-- access switches -->
+      <g class="dev sw" transform="translate(140,605)">
+        <rect x="0" y="0" width="100" height="30" rx="7"/>
+        <text class="name" x="50" y="14">asw1</text>
+        <text class="role" x="50" y="25">接入交换</text>
+      </g>
+      <g class="dev sw" transform="translate(380,605)">
+        <rect x="0" y="0" width="100" height="30" rx="7"/>
+        <text class="name" x="50" y="14">asw2</text>
+        <text class="role" x="50" y="25">接入交换</text>
+      </g>
+      <g class="dev sw" transform="translate(720,605)">
+        <rect x="0" y="0" width="100" height="30" rx="7"/>
+        <text class="name" x="50" y="14">asw3</text>
+        <text class="role" x="50" y="25">接入交换</text>
+      </g>
+      <g class="dev sw" transform="translate(960,605)">
+        <rect x="0" y="0" width="100" height="30" rx="7"/>
+        <text class="name" x="50" y="14">asw4</text>
+        <text class="role" x="50" y="25">接入交换</text>
+      </g>
+
+      <!-- PCs -->
+      <g class="dev pc" transform="translate(140,715)">
+        <rect x="0" y="0" width="100" height="42" rx="7"/>
+        <text class="name" x="50" y="16">pc1</text>
+        <text class="ip"   x="50" y="30">10.1.0.11</text>
+        <text class="role" x="50" y="40">gw 10.1.0.1</text>
+      </g>
+      <g class="dev pc" transform="translate(380,715)">
+        <rect x="0" y="0" width="100" height="42" rx="7"/>
+        <text class="name" x="50" y="16">pc2</text>
+        <text class="ip"   x="50" y="30">10.1.0.12</text>
+        <text class="role" x="50" y="40">gw 10.1.0.1</text>
+      </g>
+      <g class="dev pc" transform="translate(720,715)">
+        <rect x="0" y="0" width="100" height="42" rx="7"/>
+        <text class="name" x="50" y="16">pc3</text>
+        <text class="ip"   x="50" y="30">10.2.0.11</text>
+        <text class="role" x="50" y="40">gw 10.2.0.1</text>
+      </g>
+      <g class="dev pc" transform="translate(960,715)">
+        <rect x="0" y="0" width="100" height="42" rx="7"/>
+        <text class="name" x="50" y="16">pc4</text>
+        <text class="ip"   x="50" y="30">10.2.0.12</text>
+        <text class="role" x="50" y="40">gw 10.2.0.1</text>
+      </g>
+
+    </svg>
+  </div>
+
+  <aside>
+    <div class="card">
+      <h2>图例</h2>
+      <div class="legend">
+        <span><i style="background: var(--ceos)"></i>cEOS 路由器</span>
+        <span><i style="background: var(--sw)"></i>Alpine L2 桥（交换机）</span>
+        <span><i style="background: var(--pc)"></i>PC</span>
+        <span><i style="background: var(--nat)"></i>NAT 网关（inet）</span>
+        <span><i style="background: var(--inet)"></i>互联网</span>
+      </div>
+      <p class="note" style="margin-top:10px">
+        <strong style="color:#22d3ee">虚线</strong>：广域上行；
+        <strong style="color:#38bdf8">粗实线</strong>：路由骨干；
+        细实线：本地/接入链路。
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>数据面 IP 规划</h2>
+      <table>
+        <tr><td>csw1 广播域</td><td>10.1.0.0/24</td></tr>
+        <tr><td>csw2 广播域</td><td>10.2.0.0/24</td></tr>
+        <tr><td>core1 ↔ core2</td><td>10.0.12.0/30</td></tr>
+        <tr><td>core1 ↔ edge1</td><td>10.0.13.0/30</td></tr>
+        <tr><td>core2 ↔ edge2</td><td>10.0.24.0/30</td></tr>
+        <tr><td>edge1 ↔ inet</td><td>192.168.100.0/30</td></tr>
+        <tr><td>edge2 ↔ inet</td><td>192.168.100.4/30</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Mgmt 网络（campus-mgmt · 172.30.30.0/24）</h2>
+      <table>
+        <tr><td>edge1</td><td>172.30.30.8</td></tr>
+        <tr><td>edge2</td><td>172.30.30.5</td></tr>
+        <tr><td>core1</td><td>172.30.30.7</td></tr>
+        <tr><td>core2</td><td>172.30.30.6</td></tr>
+        <tr><td>csw1</td><td>172.30.30.4</td></tr>
+        <tr><td>csw2</td><td>172.30.30.9</td></tr>
+        <tr><td>asw1</td><td>172.30.30.3</td></tr>
+        <tr><td>asw2</td><td>172.30.30.11</td></tr>
+        <tr><td>asw3</td><td>172.30.30.2</td></tr>
+        <tr><td>asw4</td><td>172.30.30.10</td></tr>
+        <tr><td>inet</td><td>172.30.30.12 (仅此可出网)</td></tr>
+      </table>
+      <p class="note" style="margin-top:10px">
+        <code>deploy.sh</code> 用 iptables 关掉了 mgmt 子网的 MASQUERADE，
+        只留 <code>inet</code> 一个 /32 例外——路由器/交换机的 mgmt 口无法访问互联网。
+        PC 无 mgmt 接口（<code>network-mode: none</code>），只走数据面。
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>转发路径示例</h2>
+      <p class="note">
+        <b>pc1 → 8.8.8.8</b>：<br>
+        pc1 → asw1 → csw1 → <b>core1</b> → edge1 → inet →（NAT）→ Internet
+      </p>
+      <p class="note">
+        <b>pc1 → pc4</b>：<br>
+        pc1 → asw1 → csw1 → <b>core1</b> → <b>core2</b> → csw2 → asw4 → pc4
+      </p>
+    </div>
+  </aside>
+</main>
+</body>
+</html>
